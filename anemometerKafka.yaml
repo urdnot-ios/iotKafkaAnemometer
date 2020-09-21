@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: anemometerKafka.yaml
+  name: iot-anemometer-kafka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: iot-anemometer-kafka
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: iot-anemometer-kafka
+    spec:
+      containers:
+        - image: intel-server-03:5000/iotkafkaanemometer
+          name: iot-bme680-kafka-reader
+          imagePullPolicy: Always
+          env:
+            - name: KAFKA_TOPIC
+              value: windSpeed
+            - name: INFLUX_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: influx-secrets
+                  key: username
+            - name: INFLUX_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: influx-secrets
+                  key: password
+          envFrom:
+            - configMapRef:
+                name: kafka-config
+            - configMapRef:
+                name: influx-config
+
